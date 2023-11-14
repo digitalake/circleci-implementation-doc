@@ -67,7 +67,7 @@ version: 2.1
 jobs:
   rollback:
     docker:
-      - image: circleci/golang:1.17
+      - image: ivanopulo/gitcurl:0.0.1
     steps:
       - run:
           name: Rollback
