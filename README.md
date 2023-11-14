@@ -47,3 +47,46 @@ WORKDIR /go/src/terratest
 ```
 
 `Self-made images` allows to prepare the most effective environments for each job and exclude additional steps during executing.
+
+### Implementing rollback
+
+In my personal oppinion, `automated rollback` cannot be implemented on `main` branch not to damage the `git timeline`. I thing hat using the same flow as the `fix` branches can allow developers and devops engineers to follow the `familiar git flow`.
+
+So the best option for `manual rollback` is:
+
+- clonning the repo with `git clone`
+- branching to the rollback-branch (let's say it`s the same `fix`) with `git checkout -b fix` 
+- reverting the commit  `git revert HEAD`
+- pushing with `git push origin fix`
+- creating a PR with the CLI or with the UI
+
+The rollback can be also imlemented with the separate `rollback pipeline`:
+```
+version: 2.1
+
+jobs:
+  rollback:
+    docker:
+      - image: circleci/golang:1.17
+    steps:
+      - run:
+          name: Rollback
+          command: |
+            current_datetime=$(date +%Y-%m-%d_%H-%M)
+            git config --global user.name "CircleRollback"
+            git config --global user.email "circle.rollback@ci.com"
+            git clone https://${TOKEN}@github.com/digitalake/webserver-ec2-module-terraform.git
+            cd webserver-ec2-module-terraform
+            git checkout -b rollback-fix-${current_datetime}
+            git revert HEAD
+            git remote set-url origin https://${TOKEN}@github.com/digitalake/rollback-fix-${current_datetime}.git
+            git push origin
+            curl -L \
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/digitalake/webserver-ec2-module-terraform/pulls \
+              -d "{\"title\":\"Automatic Revert by CircleCI\",\"body\":\"This PR is automatically created by CircleCI for rollback. Timestamp: ${current_datetime}\",\"head\":\"rollback-fix-${current_datetime}\",\"base\":\"main\"}"
+```
+
