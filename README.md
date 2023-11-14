@@ -5,6 +5,11 @@
 > [!IMPORTANT]
 > Check the [link](https://github.com/itsyndicate-support/webserver-ec2-module-terraform/pull/6) to the PR
 
+Pipeline execution result:
+
+![image](https://github.com/digitalake/circleci-implementation-doc/assets/109740456/0fdbb8d2-0f4e-4889-936f-606882110380)
+
+
 ### Preparing Dockerfiles
 
 One ofthe most common parts for my `CircleCI pipeline` is preparing `Docker job base images`. In this case images were used:
