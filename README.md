@@ -78,9 +78,9 @@ jobs:
             git clone https://${TOKEN}@github.com/digitalake/webserver-ec2-module-terraform.git
             cd webserver-ec2-module-terraform
             git checkout -b rollback-fix-${current_datetime}
-            git revert HEAD
-            git remote set-url origin https://${TOKEN}@github.com/digitalake/rollback-fix-${current_datetime}.git
-            git push origin
+            git revert -m 1 HEAD
+            git remote add origin https://${TOKEN}@github.com/digitalake/webserver-ec2-module-terraform.git
+            git push --set-upstream origin rollback-fix-${current_datetime}
             curl -L \
               -X POST \
               -H "Accept: application/vnd.github+json" \
